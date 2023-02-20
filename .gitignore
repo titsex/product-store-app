@@ -3,6 +3,7 @@
 /node_modules
 
 .development.env
+.production.env
 pnpm-lock.yaml
 
 # Logs
