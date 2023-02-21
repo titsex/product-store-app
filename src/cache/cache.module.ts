@@ -1,6 +1,6 @@
 import { cacheProvider } from '@cache/cache.provider'
-import { Module } from '@nestjs/common'
 import { CacheService } from '@cache/cache.service'
+import { Module } from '@nestjs/common'
 
 @Module({
     exports: [CacheService],

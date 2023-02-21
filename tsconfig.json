@@ -22,6 +22,7 @@
       "@database/*": ["database/*"],
       "@user/*": ["users/*"],
       "@auth/*": ["auth/*"],
+      "@token/*": ["tokens/*"],
       "@mailer/*": ["mailer/*"],
       "@cache/*": ["cache/*"],
       "@utils": ["utils"]

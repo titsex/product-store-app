@@ -1,5 +1,5 @@
-import { createClient } from 'redis'
 import { Provider } from '@nestjs/common'
+import { createClient } from 'redis'
 
 export const cacheProvider: Provider[] = [
     {

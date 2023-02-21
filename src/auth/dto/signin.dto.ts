@@ -8,4 +8,8 @@ export class SigninDto {
     @IsNotEmpty()
     @Length(8)
     public password: string
+
+    public userAgent: string
+
+    public ip: string
 }

@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { IsEmail, IsString, Length } from 'class-validator'
+import { TokenEntity } from '@token/models/token.entity'
 
 @Entity('users')
 export class UserEntity {
@@ -27,4 +28,7 @@ export class UserEntity {
     @Length(2)
     @Column()
     public lastName: string
+
+    @OneToMany(() => TokenEntity, (token: TokenEntity) => token.user)
+    tokens: TokenEntity[]
 }

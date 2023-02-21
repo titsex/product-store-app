@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { RedisClientType } from 'redis'
 import { CacheType } from '@cache/types/cache.type'
+import { RedisClientType } from 'redis'
 
 @Injectable()
 export class CacheService {

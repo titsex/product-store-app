@@ -6,4 +6,8 @@ export class ActivateDto {
 
     @IsNotEmpty()
     public unique: string
+
+    public ip: string
+
+    public userAgent: string
 }
