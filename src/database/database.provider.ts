@@ -4,7 +4,7 @@ import { readdirSync } from 'fs'
 import { join } from 'path'
 import { Logger, Provider } from '@nestjs/common'
 
-// A Kludge to solve the problem in typeorm 0.3.12
+// On window 11 there is some bug with paths and "join(__dirname, '..', '/**/*.entity.js ')" does not load entity schemas
 async function fetchAllEntities(srcPath: string, entities: EntitySchema[] = []) {
     const files = readdirSync(srcPath)
 
