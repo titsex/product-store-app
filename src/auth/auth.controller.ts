@@ -47,4 +47,18 @@ export class AuthController {
 
         return response.status(200).json(result)
     }
+
+    @Post('refresh')
+    async refresh(
+        @Res() response: Response,
+        @RefreshToken() refreshToken: string,
+        @Ip() ip: string,
+        @UserAgent() userAgent: string
+    ) {
+        const result = await this.authService.refresh({ refreshToken, ip, userAgent })
+
+        response.cookie('refreshToken', result.refreshToken, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 })
+
+        return response.status(200).json(result)
+    }
 }

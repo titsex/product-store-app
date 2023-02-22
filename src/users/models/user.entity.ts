@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
-import { IsEmail, IsString, Length } from 'class-validator'
+import { IsArray, IsEmail, IsString, Length } from 'class-validator'
 import { TokenEntity } from '@token/models/token.entity'
+import { RolesList } from '@roles/roles.enum'
 
 @Entity('users')
 export class UserEntity {
@@ -29,6 +30,10 @@ export class UserEntity {
     @Column()
     public lastName: string
 
+    @IsArray()
+    @Column('simple-array', { default: RolesList.User })
+    public roles: RolesList[]
+
     @OneToMany(() => TokenEntity, (token: TokenEntity) => token.user)
-    tokens: TokenEntity[]
+    public tokens: TokenEntity[]
 }

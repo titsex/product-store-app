@@ -10,14 +10,14 @@ export class TokenService {
     constructor(@Inject('TOKEN_ENTITY') private readonly tokenRepository: Repository<TokenEntity>) {}
 
     async saveRefreshToken(user: UserEntity, refreshToken: string, ip: string, userAgent: string) {
-        const tokens = await this.tokenRepository.findBy({ user })
+        const tokens = await this.tokenRepository.findBy({ user: { id: user.id } })
 
         if (tokens.length) {
             for (const token of tokens) {
                 const payload = decode(token.refreshToken)
 
                 if (typeof payload === 'object' && 'exp' in payload && Date.now() < payload.exp)
-                    await this.tokenRepository.delete(token)
+                    await this.tokenRepository.delete(token.id)
 
                 if (token.ip === ip && token.userAgent === userAgent) {
                     token.refreshToken = refreshToken
@@ -43,20 +43,24 @@ export class TokenService {
         const candidate = await this.tokenRepository.findOneBy({ refreshToken })
         if (!candidate) throw new UnauthorizedException()
 
-        return await this.tokenRepository.delete(candidate)
+        return await this.tokenRepository.delete(candidate.id)
     }
 
-    validateRefreshToken(token: string) {
+    async findRefreshToken(refreshToken: string) {
+        return await this.tokenRepository.findBy({ refreshToken })
+    }
+
+    validateRefreshToken(refreshToken: string) {
         try {
-            return verify(token, process.env.JWT_REFRESH_SECRET)
+            return verify(refreshToken, process.env.JWT_REFRESH_SECRET)
         } catch (error) {
             return null
         }
     }
 
-    validateAccessToken(token: string) {
+    validateAccessToken(accessToken: string) {
         try {
-            return verify(token, process.env.JWT_ACCESS_SECRET)
+            return verify(accessToken, process.env.JWT_ACCESS_SECRET)
         } catch (error) {
             return null
         }

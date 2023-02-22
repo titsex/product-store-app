@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { GeneratePayload } from '@auth/classes/generate-payload'
 import { MailerService } from '@mailer/mailer.service'
 import { UserEntity } from '@user/models/user.entity'
@@ -10,6 +10,7 @@ import { SigninDto } from '@auth/dto/signin.dto'
 import { compare, hash } from 'bcrypt'
 import { Repository } from 'typeorm'
 import { v4 } from 'uuid'
+import { RefreshDto } from '@auth/dto/refresh.dto'
 
 @Injectable()
 export class AuthService {
@@ -81,6 +82,24 @@ export class AuthService {
 
         const user: UserEntity = parsedCache.user
         await this.userRepository.save(parsedCache.user)
+
+        const payload = new GeneratePayload(user)
+        const tokens = this.tokenService.generateTokens(payload)
+
+        await this.tokenService.saveRefreshToken(user, tokens.refreshToken, data.ip, data.userAgent)
+        return { user: payload, ...tokens }
+    }
+
+    async refresh(data: RefreshDto) {
+        if (!data.refreshToken) throw new UnauthorizedException()
+
+        const userData = this.tokenService.validateRefreshToken(data.refreshToken) as GeneratePayload
+        const tokenFromDb = await this.tokenService.findRefreshToken(data.refreshToken)
+
+        if (!userData || !tokenFromDb) throw new UnauthorizedException()
+
+        const user = await this.userRepository.findOneBy({ id: userData.id })
+        if (!user) throw new BadRequestException('The user is not in the database')
 
         const payload = new GeneratePayload(user)
         const tokens = this.tokenService.generateTokens(payload)
