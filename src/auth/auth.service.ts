@@ -9,8 +9,8 @@ import { SignupDto } from '@auth/dto/signup.dto'
 import { SigninDto } from '@auth/dto/signin.dto'
 import { compare, hash } from 'bcrypt'
 import { Repository } from 'typeorm'
-import { v4 } from 'uuid'
 import { RefreshDto } from '@auth/dto/refresh.dto'
+import { generateUniqueHex } from '@utils'
 
 @Injectable()
 export class AuthService {
@@ -39,7 +39,7 @@ export class AuthService {
             password: hashedPassword,
         })
 
-        const unique = v4()
+        const unique = await generateUniqueHex()
 
         await this.mailerService.sendAccountActivationLink(data.email, unique)
         await this.cacheService.setCache(user.email, JSON.stringify({ user, unique }), 'signup')

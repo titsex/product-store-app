@@ -1,4 +1,5 @@
 import { BadRequestException, ValidationError } from '@nestjs/common'
+import { randomBytes } from 'crypto'
 
 export function transformValidationErrors(errors: ValidationError[]) {
     const result = []
@@ -20,3 +21,10 @@ export function transformValidationErrors(errors: ValidationError[]) {
 
     return new BadRequestException(result)
 }
+
+export const randomString = (length: number) => randomBytes(length).toString('hex')
+
+export const randomNumber = (minimum: number, maximum: number) =>
+    Math.floor(Math.random() * (maximum - minimum + 1) + minimum)
+
+export const generateUniqueHex = async (): Promise<string> => randomString(randomNumber(10, 20))
