@@ -1,27 +1,27 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common'
 import { GeneratePayload } from '@auth/classes/generate-payload'
+import { CreateUserDto } from '@user/dto/create-user.dto'
 import { MailerService } from '@mailer/mailer.service'
 import { UserEntity } from '@user/models/user.entity'
 import { ActivateDto } from '@auth/dto/activate.dto'
 import { CacheService } from '@cache/cache.service'
 import { TokenService } from '@token/token.service'
-import { SignupDto } from '@auth/dto/signup.dto'
-import { SigninDto } from '@auth/dto/signin.dto'
-import { compare, hash } from 'bcrypt'
-import { Repository } from 'typeorm'
 import { RefreshDto } from '@auth/dto/refresh.dto'
+import { SigninDto } from '@auth/dto/signin.dto'
+import { UserService } from '@user/user.service'
 import { generateUniqueHex } from '@utils'
+import { compare } from 'bcrypt'
 
 @Injectable()
 export class AuthService {
     constructor(
-        @Inject('USER_ENTITY') private readonly userRepository: Repository<UserEntity>,
         private readonly cacheService: CacheService,
         private readonly tokenService: TokenService,
+        private readonly userService: UserService,
         private readonly mailerService: MailerService
     ) {}
 
-    async signup(data: SignupDto) {
+    async signup(data: CreateUserDto) {
         const cachedCandidate = await this.cacheService.getCache(data.email, 'signup')
 
         if (cachedCandidate)
@@ -29,16 +29,10 @@ export class AuthService {
                 'This email is already at the last stage of registration, awaiting confirmation'
             )
 
-        const candidate = await this.userRepository.findOneBy({ email: data.email })
+        const candidate = await this.userService.findOne(data.email)
         if (candidate) throw new BadRequestException(`A user with such an email already exists`)
 
-        const hashedPassword = await hash(data.password, 5)
-
-        const user = this.userRepository.create({
-            ...data,
-            password: hashedPassword,
-        })
-
+        const user = await this.userService.create(data)
         const unique = await generateUniqueHex()
 
         await this.mailerService.sendAccountActivationLink(data.email, unique)
@@ -48,7 +42,7 @@ export class AuthService {
     }
 
     async signin(data: SigninDto) {
-        const candidate = await this.userRepository.findOneBy({ email: data.email })
+        const candidate = await this.userService.findOne(data.email)
         if (!candidate) throw new BadRequestException(`There is no user with such an email address`)
 
         const passwordsIsMatch = await compare(data.password, candidate.password)
@@ -67,7 +61,7 @@ export class AuthService {
     }
 
     async activate(data: ActivateDto) {
-        const candidate = await this.userRepository.findOneBy({ email: data.email })
+        const candidate = await this.userService.findOne(data.email)
         if (candidate) throw new BadRequestException('Your account is already activated')
 
         const cachedCandidate = await this.cacheService.getCache(data.email, 'signup')
@@ -81,7 +75,7 @@ export class AuthService {
             throw new BadRequestException('Invalid activation link')
 
         const user: UserEntity = parsedCache.user
-        await this.userRepository.save(parsedCache.user)
+        await this.userService.save(user)
 
         const payload = new GeneratePayload(user)
         const tokens = this.tokenService.generateTokens(payload)
@@ -98,7 +92,7 @@ export class AuthService {
 
         if (!userData || !tokenFromDb) throw new UnauthorizedException()
 
-        const user = await this.userRepository.findOneBy({ id: userData.id })
+        const user = await this.userService.findOne(userData.id)
         if (!user) throw new BadRequestException('The user is not in the database')
 
         const payload = new GeneratePayload(user)

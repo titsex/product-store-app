@@ -1,9 +1,11 @@
 import { UserEntity } from '@user/models/user.entity'
 import { DataSource } from 'typeorm'
 
+export const UserEntityKey = 'USER_ENTITY'
+
 export const userProvider = [
     {
-        provide: 'USER_ENTITY',
+        provide: UserEntityKey,
         useFactory: async (dataSource: DataSource) => dataSource.getRepository(UserEntity),
         inject: ['DATABASE_CONNECTION'],
     },

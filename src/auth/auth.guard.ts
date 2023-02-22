@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
-import { Observable } from 'rxjs'
+import { AUTH_KEY } from '@auth/decorators/auth.decorator'
 import { TokenService } from '@token/token.service'
 import { Reflector } from '@nestjs/core'
-import { AUTH_KEY } from '@auth/decorators/auth.decorator'
+import { Observable } from 'rxjs'
 
 @Injectable()
 export class AuthGuard implements CanActivate {

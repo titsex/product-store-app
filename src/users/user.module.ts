@@ -6,7 +6,7 @@ import { Module } from '@nestjs/common'
 
 @Module({
     imports: [DatabaseModule],
-    exports: [...userProvider],
+    exports: [UserService],
     controllers: [UserController],
     providers: [UserService, ...userProvider],
 })

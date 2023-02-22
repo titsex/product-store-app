@@ -3,16 +3,16 @@ import { RefreshToken } from '@auth/decorators/refresh-token.decorator'
 import { UserAgent } from '@auth/decorators/user-agent.decorator'
 import { ActivateDto } from '@auth/dto/activate.dto'
 import { AuthService } from '@auth/auth.service'
-import { SignupDto } from '@auth/dto/signup.dto'
 import { SigninDto } from '@auth/dto/signin.dto'
 import { Response } from 'express'
+import { CreateUserDto } from '@user/dto/create-user.dto'
 
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     @Post('signup')
-    async signup(@Body() dto: SignupDto) {
+    async signup(@Body() dto: CreateUserDto) {
         return await this.authService.signup(dto)
     }
 
