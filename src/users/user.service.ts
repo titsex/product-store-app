@@ -10,12 +10,13 @@ export class UserService {
     constructor(@Inject(UserEntityKey) private readonly userRepository: Repository<UserEntity>) {}
 
     async create(data: CreateUserDto) {
-        const hashedPassword = await hash(data.password, 5)
+        const user = this.userRepository.create(data)
 
-        return this.userRepository.create({
-            ...data,
-            password: hashedPassword,
-        })
+        if (data.password) {
+            user.password = await hash(data.password, 5)
+        }
+
+        return user
     }
 
     async save(user: UserEntity) {

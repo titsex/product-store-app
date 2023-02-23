@@ -11,6 +11,7 @@ import { SigninDto } from '@auth/dto/signin.dto'
 import { UserService } from '@user/user.service'
 import { generateUniqueHex } from '@utils'
 import { compare } from 'bcrypt'
+import { GoogleService } from '@google/google.service'
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,8 @@ export class AuthService {
         private readonly cacheService: CacheService,
         private readonly tokenService: TokenService,
         private readonly userService: UserService,
-        private readonly mailerService: MailerService
+        private readonly mailerService: MailerService,
+        private readonly googleService: GoogleService
     ) {}
 
     async signup(data: CreateUserDto) {
@@ -100,5 +102,29 @@ export class AuthService {
 
         await this.tokenService.saveRefreshToken(user, tokens.refreshToken, data.ip, data.userAgent)
         return { user: payload, ...tokens }
+    }
+
+    getAuthorizeUrl() {
+        return this.googleService.getAuthorizeUrl()
+    }
+
+    async getToken(code: string) {
+        return await this.googleService.getToken(code)
+    }
+
+    decodeIdToken(idToken: string) {
+        return this.tokenService.decodeToken(idToken)
+    }
+
+    async oAuth(data: CreateUserDto) {
+        const candidate = await this.userService.findOne(data.email)
+        if (candidate) return new GeneratePayload(candidate)
+
+        const user = await this.userService.create(data)
+        return await this.userService.save(user)
+    }
+
+    async verifyIdToken(idToken) {
+        return await this.googleService.verifyIdToken(idToken)
     }
 }

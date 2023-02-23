@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } f
 import { IsArray, IsEmail, IsString, Length } from 'class-validator'
 import { TokenEntity } from '@token/models/token.entity'
 import { RolesList } from '@roles/roles.enum'
+import { Optional } from '@nestjs/common'
 
 @Entity('users')
 export class UserEntity {
@@ -17,8 +18,9 @@ export class UserEntity {
 
     @IsString()
     @Length(8)
-    @Column()
-    public password: string
+    @Optional()
+    @Column({ nullable: true })
+    public password?: string
 
     @IsString()
     @Length(2)
@@ -27,8 +29,9 @@ export class UserEntity {
 
     @IsString()
     @Length(2)
-    @Column()
-    public lastName: string
+    @Optional()
+    @Column({ nullable: true })
+    public lastName?: string
 
     @IsArray()
     @Column('simple-array', { default: RolesList.User })

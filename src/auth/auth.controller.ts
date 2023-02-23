@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, Ip, Param } from '@nestjs/common'
+import { Body, Controller, Get, Post, Res, Ip, Param, Query } from '@nestjs/common'
 import { RefreshToken } from '@auth/decorators/refresh-token.decorator'
 import { UserAgent } from '@auth/decorators/user-agent.decorator'
 import { ActivateDto } from '@auth/dto/activate.dto'
@@ -60,5 +60,22 @@ export class AuthController {
         response.cookie('refreshToken', result.refreshToken, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 })
 
         return response.status(200).json(result)
+    }
+
+    @Get('google')
+    async google(@Res() response: Response, @Query('code') code: string) {
+        const authorizeUrl = this.authService.getAuthorizeUrl()
+
+        const data = await this.authService.getToken(code)
+
+        if (!data) {
+            return response.redirect(authorizeUrl)
+        }
+
+        const tokenInfo = await this.authService.verifyIdToken(data.tokens.id_token)
+        const payload = tokenInfo.getPayload()
+        const result = await this.authService.oAuth({ email: payload.email, firstName: payload.name })
+
+        return response.status(200).json({ user: result, accessToken: data.tokens.access_token })
     }
 }
