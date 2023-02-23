@@ -80,8 +80,4 @@ export class TokenService {
 
         return { accessToken, refreshToken }
     }
-
-    decodeToken(token: string) {
-        return decode(token)
-    }
 }

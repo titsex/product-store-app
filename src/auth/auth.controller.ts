@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Post, Res, Ip, Param, Query } from '@nestjs/common'
 import { RefreshToken } from '@auth/decorators/refresh-token.decorator'
 import { UserAgent } from '@auth/decorators/user-agent.decorator'
+import { CreateUserDto } from '@user/dto/create-user.dto'
 import { ActivateDto } from '@auth/dto/activate.dto'
 import { AuthService } from '@auth/auth.service'
 import { SigninDto } from '@auth/dto/signin.dto'
 import { Response } from 'express'
-import { CreateUserDto } from '@user/dto/create-user.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -63,19 +63,29 @@ export class AuthController {
     }
 
     @Get('google')
-    async google(@Res() response: Response, @Query('code') code: string) {
+    async google(
+        @Res() response: Response,
+        @Ip() ip: string,
+        @UserAgent() userAgent: string,
+        @Query('code') code: string
+    ) {
         const authorizeUrl = this.authService.getAuthorizeUrl()
 
         const data = await this.authService.getToken(code)
-
-        if (!data) {
-            return response.redirect(authorizeUrl)
-        }
+        if (!data) return response.redirect(authorizeUrl)
 
         const tokenInfo = await this.authService.verifyIdToken(data.tokens.id_token)
-        const payload = tokenInfo.getPayload()
-        const result = await this.authService.oAuth({ email: payload.email, firstName: payload.name })
+        if (!tokenInfo) return response.redirect(authorizeUrl)
 
-        return response.status(200).json({ user: result, accessToken: data.tokens.access_token })
+        const result = await this.authService.oAuth({
+            ip,
+            userAgent,
+            payload: tokenInfo.getPayload(),
+            tokens: data.tokens,
+        })
+
+        response.cookie('refreshToken', result.refreshToken, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 })
+
+        return response.status(200).json(result)
     }
 }

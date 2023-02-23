@@ -12,7 +12,7 @@ export class GoogleService {
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile',
             ],
-            include_granted_scopes: true,
+            prompt: 'consent',
         })
     }
 
@@ -24,17 +24,9 @@ export class GoogleService {
         }
     }
 
-    async getTokenInfo(accessToken: string) {
+    async verifyIdToken(token: string) {
         try {
-            return await this.oAuth2Client.getTokenInfo(accessToken)
-        } catch {
-            return null
-        }
-    }
-
-    async verifyIdToken(idToken: string) {
-        try {
-            return await await this.oAuth2Client.verifyIdToken({ idToken })
+            return await await this.oAuth2Client.verifyIdToken({ idToken: token })
         } catch {
             return null
         }

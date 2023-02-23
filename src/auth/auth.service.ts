@@ -12,6 +12,7 @@ import { UserService } from '@user/user.service'
 import { generateUniqueHex } from '@utils'
 import { compare } from 'bcrypt'
 import { GoogleService } from '@google/google.service'
+import { OauthDto } from '@auth/dto/oauth.dto'
 
 @Injectable()
 export class AuthService {
@@ -104,27 +105,38 @@ export class AuthService {
         return { user: payload, ...tokens }
     }
 
-    getAuthorizeUrl() {
-        return this.googleService.getAuthorizeUrl()
-    }
-
     async getToken(code: string) {
         return await this.googleService.getToken(code)
     }
 
-    decodeIdToken(idToken: string) {
-        return this.tokenService.decodeToken(idToken)
+    async oAuth(data: OauthDto) {
+        let user: UserEntity
+
+        const candidate = await this.userService.findOne(data.payload.email)
+
+        if (candidate) user = candidate
+        else {
+            user = await this.userService.create({
+                email: data.payload.email,
+                firstName: data.payload.given_name,
+                lastName: data.payload.family_name,
+            })
+
+            user = await this.userService.save(user)
+        }
+
+        const payload = new GeneratePayload(user)
+        const tokens = this.tokenService.generateTokens(payload)
+
+        await this.tokenService.saveRefreshToken(user, tokens.refreshToken, data.ip, data.userAgent)
+        return { user: payload, ...tokens }
     }
 
-    async oAuth(data: CreateUserDto) {
-        const candidate = await this.userService.findOne(data.email)
-        if (candidate) return new GeneratePayload(candidate)
-
-        const user = await this.userService.create(data)
-        return await this.userService.save(user)
+    async verifyIdToken(token: string) {
+        return await this.googleService.verifyIdToken(token)
     }
 
-    async verifyIdToken(idToken) {
-        return await this.googleService.verifyIdToken(idToken)
+    getAuthorizeUrl() {
+        return this.googleService.getAuthorizeUrl()
     }
 }
