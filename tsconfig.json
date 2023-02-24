@@ -22,12 +22,8 @@
       "@database/*": ["database/*"],
       "@user/*": ["users/*"],
       "@auth/*": ["auth/*"],
-      "@google/*": ["google/*"],
-      "@token/*": ["tokens/*"],
       "@roles/*": ["roles/*"],
-      "@mailer/*": ["mailer/*"],
-      "@cache/*": ["cache/*"],
-      "@utils": ["utils"]
+      "@mailer/*": ["mailer/*"]
     }
   }
 }

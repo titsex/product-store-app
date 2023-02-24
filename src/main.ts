@@ -1,20 +1,27 @@
 import * as cookieParser from 'cookie-parser'
+import * as session from 'express-session'
+import * as passport from 'passport'
 
-import { transformValidationErrors } from '@utils'
-import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from '@app'
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
 
-    app.useGlobalPipes(
-        new ValidationPipe({
-            whitelist: true,
-            exceptionFactory: transformValidationErrors,
+
+    app.use(
+        session({
+            secret: process.env.SESSION_SECRET,
+            saveUninitialized: false,
+            resave: false,
+            cookie: {
+                maxAge: 60 * 1000,
+            },
         })
     )
 
+    app.use(passport.initialize())
+    app.use(passport.session())
     app.use(cookieParser())
 
     await app.listen(7000)

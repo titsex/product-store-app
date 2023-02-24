@@ -1,6 +1,7 @@
 import { DatabaseModule } from '@database/database.module'
 import { MailerModule } from '@mailer/mailer.module'
 import { UserModule } from '@user/user.module'
+import { AuthModule } from '@auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
 import { Module } from '@nestjs/common'
 
@@ -12,6 +13,7 @@ import { Module } from '@nestjs/common'
         }),
         DatabaseModule,
         MailerModule,
+        AuthModule,
         UserModule,
     ],
 })
