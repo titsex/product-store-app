@@ -1,6 +1,5 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm'
 import { IsArray, IsEmail, IsString, Length } from 'class-validator'
-import { TokenEntity } from '@token/models/token.entity'
 import { RolesList } from '@roles/roles.enum'
 import { Optional } from '@nestjs/common'
 
@@ -36,7 +35,4 @@ export class UserEntity {
     @IsArray()
     @Column('simple-array', { default: RolesList.User })
     public roles: RolesList[]
-
-    @OneToMany(() => TokenEntity, (token: TokenEntity) => token.user)
-    public tokens: TokenEntity[]
 }
