@@ -1,71 +1,66 @@
-import { MicrosoftGuard } from '@auth/guards/microsoft.guard'
 import { Controller, Get, UseGuards } from '@nestjs/common'
-import { GoogleGuard } from '@auth/guards/google.guard'
 import { User } from '@auth/decorators/user.decorator'
+import { AuthGuard } from '@auth/guards/auth.guard'
 import { Payload } from '@auth/dto/payload.dto'
-import { GithubGuard } from '@auth/guards/github.guard'
-import { DiscordGuard } from '@auth/guards/discord.guard'
-import { VKGuard } from '@auth/guards/vk.guard'
-import { YandexGuard } from '@auth/guards/yandex.guard'
 
 @Controller('auth')
 export class AuthController {
     @Get('google/signin')
-    @UseGuards(GoogleGuard)
+    @UseGuards(AuthGuard('google'))
     async googleSignIn() {}
 
     @Get('google/redirect')
-    @UseGuards(GoogleGuard)
+    @UseGuards(AuthGuard('google'))
     async googleCallback(@User() user: Payload) {
         return user
     }
 
     @Get('microsoft/signin')
-    @UseGuards(MicrosoftGuard)
+    @UseGuards(AuthGuard('microsoft'))
     async microsoftSignIn() {}
 
     @Get('microsoft/redirect')
-    @UseGuards(MicrosoftGuard)
+    @UseGuards(AuthGuard('microsoft'))
     async microsoftCallback(@User() user: Payload) {
         return user
     }
 
     @Get('github/signin')
-    @UseGuards(GithubGuard)
+    @UseGuards(AuthGuard('github'))
     async githubSignIn() {}
 
     @Get('github/redirect')
-    @UseGuards(GithubGuard)
+    @UseGuards(AuthGuard('github'))
     async githubCallback(@User() user: Payload) {
         return user
     }
 
     @Get('discord/signin')
-    @UseGuards(DiscordGuard)
+    @UseGuards(AuthGuard('discord'))
     async discordSignIn() {}
 
     @Get('discord/redirect')
-    @UseGuards(DiscordGuard)
+    @UseGuards(AuthGuard('discord'))
     async discordCallback(@User() user: Payload) {
         return user
     }
 
     @Get('vk/signin')
-    @UseGuards(VKGuard)
+    @UseGuards(AuthGuard('vk'))
     async vkSignIn() {}
 
     @Get('vk/redirect')
-    @UseGuards(VKGuard)
+    @UseGuards(AuthGuard('vk'))
     async vkCallback(@User() user: Payload) {
         return user
     }
 
     @Get('yandex/signin')
-    @UseGuards(YandexGuard)
+    @UseGuards(AuthGuard('yandex'))
     async yandexSignIn() {}
 
     @Get('yandex/redirect')
-    @UseGuards(YandexGuard)
+    @UseGuards(AuthGuard('yandex'))
     async yandexCallback(@User() user: Payload) {
         return user
     }

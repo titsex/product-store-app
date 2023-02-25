@@ -8,20 +8,21 @@ import { AppModule } from '@app'
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
 
-
     app.use(
         session({
-            secret: process.env.SESSION_SECRET,
             saveUninitialized: false,
+            secret: process.env.SESSION_SECRET,
             resave: false,
             cookie: {
-                maxAge: 60 * 1000,
+                sameSite: true,
+                httpOnly: false,
+                maxAge: 60000,
             },
         })
     )
+    passport.initialize()
+    passport.session()
 
-    app.use(passport.initialize())
-    app.use(passport.session())
     app.use(cookieParser())
 
     await app.listen(7000)
